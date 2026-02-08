@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/indigo_poy",
+    "crates/indigo_poy_cli",
+    "crates/indigo_poy_report",
+]
+
+[workspace.lints.clippy]
+all = "deny"
+pedantic = "allow"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["gorusys <goru.connector@outlook.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gorusys/indigo-proof-of-yield"
+description = "Local-first proof-of-yield for Indigo Protocol (Stability Pool, ROB, INDY staking)"

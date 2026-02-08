@@ -1,0 +1,8 @@
+/target/
+/data/
+/reports/*.json
+/reports/*.html
+/reports/*.sha256
+*.sqlite
+.env
+*.rs.bk

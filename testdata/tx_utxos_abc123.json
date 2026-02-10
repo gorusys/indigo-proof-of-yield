@@ -1,0 +1,26 @@
+{
+  "inputs": [
+    {
+      "tx_hash": "prev1",
+      "tx_index": 0,
+      "value": "5000000",
+      "datum_hash": null,
+      "asset_list": [
+        {
+          "policy_id": "policy1",
+          "asset_name": "694153736574",
+          "quantity": "100"
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "tx_hash": "abc123def456",
+      "tx_index": 0,
+      "value": "5500000",
+      "datum_hash": null,
+      "asset_list": []
+    }
+  ]
+}

@@ -55,6 +55,17 @@ indigo-poy verify --bundle ./reports/<addr>.bundle.json
 - All fetched data is cached in SQLite under the cache dir (content-hash keys).
 - For full reproducibility, run with the same cache and same CLI args; the bundle hash should match.
 
+### Demo report (screenshots / Discord)
+
+Generate a sample report with example metrics (no chain data needed):
+
+```bash
+indigo-poy report --address demo --demo
+# Open ./reports/demo.html
+```
+
+See **DISCORD_PITCH.md** for a ready-to-paste message template and snippet for Indigo Discord.
+
 ### Docker
 
 ```bash

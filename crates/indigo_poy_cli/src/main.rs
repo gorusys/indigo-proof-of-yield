@@ -88,6 +88,9 @@ struct ReportArgs {
     cache_dir: PathBuf,
     #[arg(long)]
     offline: bool,
+    /// Generate a demo report with example metrics (for screenshots / Discord pitch).
+    #[arg(long)]
+    demo: bool,
 }
 
 #[derive(Parser)]
@@ -184,6 +187,9 @@ fn run_compute(args: ComputeArgs) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn run_report(args: ReportArgs) -> Result<(), Box<dyn std::error::Error>> {
+    if args.demo {
+        return run_report_demo(&args);
+    }
     let cache = Cache::open(cache_path(&args.cache_dir))?;
     let config = FetchConfig {
         offline: args.offline,
@@ -247,6 +253,28 @@ fn run_report(args: ReportArgs) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::write(&bundle_path, serde_json::to_string_pretty(&data.bundle)?)?;
     std::fs::write(&hash_path, format!("{}\n", reproducibility_hash_sha256))?;
     info!(?html_path, ?bundle_path, ?hash_path, "report complete");
+    Ok(())
+}
+
+fn run_report_demo(args: &ReportArgs) -> Result<(), Box<dyn std::error::Error>> {
+    let bundle = EvidenceBundle::demo();
+    let reproducibility_hash_sha256 = reproducibility_hash(&bundle)?;
+    let data = ReportData {
+        bundle,
+        reproducibility_hash_sha256: reproducibility_hash_sha256.clone(),
+    };
+    std::fs::create_dir_all(&args.reports_dir)?;
+    let html_path = args
+        .out
+        .clone()
+        .unwrap_or_else(|| args.reports_dir.join("demo.html"));
+    let bundle_path = args.reports_dir.join("demo.bundle.json");
+    let hash_path = args.reports_dir.join("demo.sha256");
+    render_report(&data, &html_path)?;
+    std::fs::write(&bundle_path, serde_json::to_string_pretty(&data.bundle)?)?;
+    std::fs::write(&hash_path, format!("{}\n", reproducibility_hash_sha256))?;
+    info!(?html_path, ?bundle_path, ?hash_path, "demo report complete");
+    println!("Demo report written to {}", html_path.display());
     Ok(())
 }
 

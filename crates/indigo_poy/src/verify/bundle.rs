@@ -59,6 +59,51 @@ impl EvidenceBundle {
             fetched_at_slots,
         }
     }
+
+    /// Demo bundle for screenshots and Discord pitch (fixed timestamp, deterministic hash).
+    pub fn demo() -> Self {
+        use crate::compute::{CombinedMetrics, ComputedMetrics, IndyStakingMetrics, RobMetrics, StabilityPoolMetrics};
+        let stability_pool = StabilityPoolMetrics {
+            total_deposits_lovelace: 50_000_000,
+            total_withdrawals_lovelace: 0,
+            total_liquidations_ada_received_lovelace: 11_270_000, // ~0.49 ADA × 23
+            total_realized_premium_lovelace: 1_093_190,
+            net_ada_from_liquidations_lovelace: -38_730_000,
+            liquidation_count: 23,
+        };
+        let rob = RobMetrics {
+            total_placed_lovelace: 20_000_000,
+            total_filled_lovelace: 8_080_000,
+            total_premium_received_lovelace: 80_800,
+            avg_premium_pct: Some(1.0),
+            fill_count: 4,
+        };
+        let indy_staking = IndyStakingMetrics::default();
+        let combined = CombinedMetrics {
+            total_ada_in_lovelace: 50_000_000 + 20_000_000,
+            total_ada_out_lovelace: 11_270_000 + 8_080_000,
+            net_pnl_lovelace: -50_730_000,
+            apr_pct: Some(9.7),
+        };
+        let metrics = ComputedMetrics {
+            stability_pool,
+            rob,
+            indy_staking,
+            combined,
+            dilution: None,
+        };
+        Self {
+            version: BUNDLE_VERSION,
+            address: "addr1_demo (Indigo Proof-of-Yield sample)".to_string(),
+            created_utc_rfc3339: "2026-02-12T10:00:00Z".to_string(),
+            tx_hashes: vec!["demo_tx_1".into(), "demo_tx_2".into()],
+            input_refs: vec![],
+            api_response_hashes: vec![],
+            events: IndigoEvents::default(),
+            metrics,
+            fetched_at_slots: vec![100_000, 100_100],
+        }
+    }
 }
 
 /// Normalize JSON for hashing: sort keys and no whitespace.

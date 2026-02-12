@@ -24,6 +24,20 @@ pub fn build_html(data: &ReportData) -> Result<String, ReportError> {
     let rob = &metrics.rob;
     let indy = &metrics.indy_staking;
     let comb = &metrics.combined;
+    let avg_liq_price = if sp.liquidation_count > 0 {
+        let ada = sp.total_liquidations_ada_received_lovelace as f64 / 1_000_000.0;
+        format!("{:.2}", ada / sp.liquidation_count as f64)
+    } else {
+        "—".to_string()
+    };
+    let rob_avg_pct_snippet = rob
+        .avg_premium_pct
+        .map(|x| format!("{:.1}%", x))
+        .unwrap_or_else(|| "—".to_string());
+    let apr_snippet = comb
+        .apr_pct
+        .map(|x| format!("{:.1}", x))
+        .unwrap_or_else(|| "—".to_string());
 
     let html = format!(
         r#"<!DOCTYPE html>
@@ -43,12 +57,19 @@ h2 {{ font-size: 1.1rem; margin-top: 1.5rem; color: #8b949e; }}
 .label {{ color: #8b949e; }}
 .hash {{ font-size: 0.85em; }}
 .footer {{ margin-top: 2rem; font-size: 0.85rem; color: #8b949e; }}
+.snippet {{ font-size: 0.95rem; line-height: 1.5; }}
 </style>
 </head>
 <body>
 <h1>Proof of Yield Report</h1>
 <p class="mono">{addr}</p>
 <p>Generated: {created}</p>
+
+<h2>At a glance</h2>
+<div class="card snippet">
+  <p><strong>SP:</strong> {sp_count} liquidations, realized premium {apr_snippet}% (annualized), avg ADA liquidation price {avg_liq_price}, dilution-adjusted.</p>
+  <p><strong>ROB:</strong> {rob_fill_count} partial fills, reimbursement premium captured {rob_avg_pct_snippet}.</p>
+</div>
 
 <h2>Reproducibility</h2>
 <div class="card">
@@ -111,6 +132,9 @@ h2 {{ font-size: 1.1rem; margin-top: 1.5rem; color: #8b949e; }}
         addr = addr_escaped,
         created = escape_html(&data.bundle.created_utc_rfc3339),
         hash = hash_escaped,
+        avg_liq_price = avg_liq_price,
+        apr_snippet = apr_snippet,
+        rob_avg_pct_snippet = rob_avg_pct_snippet,
         net_pnl = comb.net_pnl_lovelace,
         total_in = comb.total_ada_in_lovelace,
         total_out = comb.total_ada_out_lovelace,

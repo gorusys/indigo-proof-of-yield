@@ -12,6 +12,6 @@ pub mod verify;
 pub use chain::fetch::{KoiosAccountTx, KoiosTxUtxos, KoiosUtxo};
 pub use chain::{Cache, FetchConfig, Fetcher};
 pub use compute::{compute_metrics, ComputeInput, ComputedMetrics};
-pub use indigo::{Event, EventKind, IndigoEvents};
+pub use indigo::{Event, EventKind, IndigoEvents, IndigoV2Config};
 pub use report::ReportData;
 pub use verify::{reproducibility_hash, EvidenceBundle, VerificationResult};

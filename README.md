@@ -49,6 +49,18 @@ indigo-poy report --address <addr> [--out ./reports/<addr>.html] [--reports-dir 
 indigo-poy verify --bundle ./reports/<addr>.bundle.json
 ```
 
+### Indigo V2 on-chain identifiers (optional)
+
+Indigo Protocol **V2** is the current mainnet version. For **accurate** protocol parsing (Stability Pool, ROB, INDY), you can supply official script/datum/policy IDs. Without them, the tool uses heuristic detection.
+
+1. Copy the sample config and fill in values (from Indigo docs or team):
+   ```bash
+   cp config/indigo_v2_config.sample.json config/indigo_v2.json
+   # Edit config/indigo_v2.json with Stability Pool / ROB script or datum hashes, iAsset and INDY policy IDs
+   ```
+2. Or set env: `INDIGO_V2_CONFIG_PATH=/path/to/indigo_v2.json`
+3. Config keys: `stability_pool_script_hashes`, `stability_pool_datum_hashes`, `iasset_policy_ids`, `rob_script_hashes`, `rob_datum_hashes`, `indy_policy_id`. Leave empty or omit for heuristic mode.
+
 ### Offline / reproducibility
 
 - Use `--offline` to rely only on previously fetched data in `--cache-dir` (default `./data/cache`).

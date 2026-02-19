@@ -39,7 +39,7 @@ fn integration_reconstruct_from_fixtures() {
     map.insert("abc123def456".to_string(), utxos_abc);
     let get = |h: &str| map.get(h).cloned();
     let now = time::OffsetDateTime::from_unix_timestamp(1700000000).unwrap();
-    let events = reconstruct_all_events(&txs, get, now);
+    let events = reconstruct_all_events(&txs, get, now, None);
     assert!(!events.stability_pool.is_empty() || events.rob.is_empty());
 }
 

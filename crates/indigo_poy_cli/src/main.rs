@@ -3,7 +3,7 @@
 use clap::{Parser, Subcommand};
 use indigo_poy::chain::{Cache, FetchConfig, Fetcher};
 use indigo_poy::compute::{compute_metrics, ComputeInput};
-use indigo_poy::indigo::reconstruct_all_events;
+use indigo_poy::indigo::{reconstruct_all_events, IndigoV2Config};
 use indigo_poy::report::ReportData;
 use indigo_poy::verify::{reproducibility_hash, EvidenceBundle, VerificationResult};
 use indigo_poy_report::render_report;
@@ -146,7 +146,8 @@ fn run_compute(args: ComputeArgs) -> Result<(), Box<dyn std::error::Error>> {
     });
     let get_tx_utxos = |hash: &str| tx_utxos.get(hash).cloned();
     let now = OffsetDateTime::now_utc();
-    let events = reconstruct_all_events(&txs, get_tx_utxos, now);
+    let config = IndigoV2Config::load();
+    let events = reconstruct_all_events(&txs, get_tx_utxos, now, Some(&config));
     let period_start = txs.iter().filter_map(|t| t.block_time).min();
     let period_end = txs.iter().filter_map(|t| t.block_time).max();
     let input = ComputeInput {
@@ -209,7 +210,8 @@ fn run_report(args: ReportArgs) -> Result<(), Box<dyn std::error::Error>> {
     });
     let get_tx_utxos = |hash: &str| tx_utxos.get(hash).cloned();
     let now = OffsetDateTime::now_utc();
-    let events = reconstruct_all_events(&txs, get_tx_utxos, now);
+    let config = IndigoV2Config::load();
+    let events = reconstruct_all_events(&txs, get_tx_utxos, now, Some(&config));
     let period_start = txs.iter().filter_map(|t| t.block_time).min();
     let period_end = txs.iter().filter_map(|t| t.block_time).max();
     let input = ComputeInput {
@@ -282,17 +284,17 @@ fn run_verify(args: VerifyArgs) -> Result<(), Box<dyn std::error::Error>> {
     let bundle_json = std::fs::read_to_string(&args.bundle)?;
     let bundle: EvidenceBundle = serde_json::from_str(&bundle_json)?;
     let computed = reproducibility_hash(&bundle)?;
+    let stem = args
+        .bundle
+        .file_stem()
+        .unwrap_or_default()
+        .to_string_lossy();
+    let hash_stem = stem.strip_suffix(".bundle").unwrap_or(stem.as_ref());
     let sha256_path = args
         .bundle
         .parent()
         .unwrap_or(std::path::Path::new("."))
-        .join(format!(
-            "{}.sha256",
-            args.bundle
-                .file_stem()
-                .unwrap_or_default()
-                .to_string_lossy()
-        ));
+        .join(format!("{}.sha256", hash_stem));
     let expected = std::fs::read_to_string(sha256_path)
         .ok()
         .map(|s| s.trim().to_string());

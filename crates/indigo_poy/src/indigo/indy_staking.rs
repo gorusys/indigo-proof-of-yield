@@ -2,14 +2,18 @@
 
 use crate::chain::fetch::{KoiosAccountTx, KoiosTxUtxos};
 use crate::indigo::events::{Event, EventKind};
+use crate::indigo::protocol_config::IndigoV2Config;
 use time::OffsetDateTime;
 
 /// Reconstruct INDY staking / SP premium / other reward-like flows.
+/// When `config.indy_policy_id` is set, we only treat txs that involve INDY token as INDY flows (future use; currently still ADA delta).
 pub fn reconstruct_indy_staking_events(
     account_txs: &[KoiosAccountTx],
     get_tx_utxos: impl Fn(&str) -> Option<KoiosTxUtxos>,
     now: OffsetDateTime,
+    config: &IndigoV2Config,
 ) -> Vec<Event> {
+    let _ = config; // reserved: filter by indy_policy_id when matching reward UTxOs by asset
     let mut events = Vec::new();
     for tx in account_txs {
         let slot = tx.slot_no;

@@ -2,13 +2,16 @@
 
 use crate::chain::fetch::{KoiosAccountTx, KoiosTxUtxos};
 use crate::indigo::events::{Event, EventKind};
+use crate::indigo::protocol_config::IndigoV2Config;
 use time::OffsetDateTime;
 
 /// Reconstruct ROB-related events from account txs and tx UTxO data.
+/// When `config` has rob_datum_hashes set, only txs that touch a UTxO with that datum are treated as ROB.
 pub fn reconstruct_rob_events(
     account_txs: &[KoiosAccountTx],
     get_tx_utxos: impl Fn(&str) -> Option<KoiosTxUtxos>,
     now: OffsetDateTime,
+    config: &IndigoV2Config,
 ) -> Vec<Event> {
     let mut events = Vec::new();
     for tx in account_txs {
@@ -26,6 +29,17 @@ pub fn reconstruct_rob_events(
 
         let inputs = utxos.inputs.as_deref().unwrap_or(&[]);
         let outputs = utxos.outputs.as_deref().unwrap_or(&[]);
+
+        if config.has_rob_datum_hashes() {
+            let touches_rob = inputs
+                .iter()
+                .chain(outputs.iter())
+                .any(|u| config.is_rob_datum(u.datum_hash.as_deref()));
+            if !touches_rob {
+                continue;
+            }
+        }
+
         let in_ada: u64 = inputs.iter().map(|u| parse_lovelace(&u.value)).sum();
         let out_ada: u64 = outputs.iter().map(|u| parse_lovelace(&u.value)).sum();
 
